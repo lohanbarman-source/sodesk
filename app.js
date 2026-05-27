@@ -321,11 +321,12 @@ function pinSubmit() {
 function launchApp() {
   const u = state.currentUser;
   document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('step-pin').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   refreshSidebarUser();
+  document.getElementById('admin-nav').style.display = '';
   if (u.role === 'Admin') {
     document.getElementById('admin-section').style.display = '';
-    document.getElementById('admin-nav').style.display = '';
   }
   const now = new Date();
   const days = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
@@ -829,6 +830,11 @@ function renderCalendar() {
 // ── ADMIN ─────────────────────────────────────────────────────────────────────
 
 function renderAdmin() {
+  const isAdmin = state.currentUser?.role === 'Admin';
+  const inviteCard = document.getElementById('admin-invite-card');
+  const dangerCard = document.getElementById('admin-danger-card');
+  if (inviteCard) inviteCard.style.display = isAdmin ? '' : 'none';
+  if (dangerCard) dangerCard.style.display = isAdmin ? '' : 'none';
   document.getElementById('u-table').innerHTML = `
     <thead><tr><th></th><th>Nom</th><th>Email</th><th>PIN</th><th>Rôle</th><th>Couleur</th><th>Action</th></tr></thead>
     <tbody>${state.users.map(u => `
@@ -969,6 +975,7 @@ function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 renderUserSelect();
 
 document.addEventListener('keydown', function(e) {
+  if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return;
   const stepPin = document.getElementById('step-pin');
   if (!stepPin || stepPin.style.display === 'none') return;
   if (e.key >= '0' && e.key <= '9') { e.preventDefault(); pinKey(e.key); }
