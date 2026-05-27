@@ -294,34 +294,15 @@ function pinSubmit() {
   const u = state.users.find(x => x.id === state.loginUserId);
   if (!u) return;
 
-  // ── Première connexion : création PIN ──────────────────────────────────────
+  // ── Première connexion : création PIN (direct, sans confirmation) ──────────
   if (state.pinCreating) {
-    if (!state.pinConfirming) {
-      state.pinCreateFirst = state.pin;
-      state.pinConfirming = true;
-      state.pin = '';
-      updateDots();
-      document.getElementById('pin-label').textContent = 'Confirmez votre code PIN';
-      document.getElementById('pin-error').textContent = '';
-      return;
-    }
-    if (state.pin === state.pinCreateFirst) {
-      u.pin = state.pin;
-      u.firstLogin = false;
-      saveState();
-      state.pinCreating = false; state.pinConfirming = false; state.pinCreateFirst = '';
-      state.currentUser = u; state.pin = '';
-      document.getElementById('pin-error').textContent = '';
-      launchApp();
-    } else {
-      document.getElementById('pin-error').textContent = 'Codes différents — recommencez.';
-      for (let i = 0; i < 4; i++) document.getElementById('d' + i).classList.add('error');
-      state.pinConfirming = false; state.pinCreateFirst = '';
-      setTimeout(() => {
-        state.pin = ''; updateDots();
-        document.getElementById('pin-label').textContent = 'Choisissez votre code PIN';
-      }, 700);
-    }
+    u.pin = state.pin;
+    u.firstLogin = false;
+    saveState();
+    state.pinCreating = false;
+    state.currentUser = u; state.pin = '';
+    document.getElementById('pin-error').textContent = '';
+    launchApp();
     return;
   }
 
@@ -986,3 +967,11 @@ function removeStatus(i) { state.mailStatuses.splice(i, 1); renderStatusList(); 
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
 renderUserSelect();
+
+document.addEventListener('keydown', function(e) {
+  const stepPin = document.getElementById('step-pin');
+  if (!stepPin || stepPin.style.display === 'none') return;
+  if (e.key >= '0' && e.key <= '9') { e.preventDefault(); pinKey(e.key); }
+  else if (e.key === 'Backspace')    { e.preventDefault(); pinDel(); }
+  else if (e.key === 'Enter')        { e.preventDefault(); if (state.pin.length === 4) pinSubmit(); }
+});
