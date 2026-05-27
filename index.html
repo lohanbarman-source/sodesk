@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoDesk — HESTS</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo-wrap">
+      <img src="assets/logo.png" alt="RB4U">
+    </div>
+    <div class="login-appname">So<span>Desk</span></div>
+    <div class="login-sub">Espace équipe communication — HESTS</div>
+
+    <!-- Étape 1 : sélection utilisateur -->
+    <div id="step-select">
+      <div class="login-step-lbl">Qui êtes-vous ?</div>
+      <div class="user-select-grid" id="user-select-grid"></div>
+    </div>
+
+    <!-- Étape 2 : saisie / création PIN -->
+    <div id="step-pin" style="display:none">
+      <div id="selected-user-display"></div>
+      <div class="pin-step-lbl" id="pin-label">Votre code PIN</div>
+
+      <div class="pin-display">
+        <div class="pin-dot" id="d0"></div>
+        <div class="pin-dot" id="d1"></div>
+        <div class="pin-dot" id="d2"></div>
+        <div class="pin-dot" id="d3"></div>
+      </div>
+
+      <div class="keypad">
+        <button class="key-btn" onclick="pinKey('1')">1</button>
+        <button class="key-btn" onclick="pinKey('2')">2</button>
+        <button class="key-btn" onclick="pinKey('3')">3</button>
+        <button class="key-btn" onclick="pinKey('4')">4</button>
+        <button class="key-btn" onclick="pinKey('5')">5</button>
+        <button class="key-btn" onclick="pinKey('6')">6</button>
+        <button class="key-btn" onclick="pinKey('7')">7</button>
+        <button class="key-btn" onclick="pinKey('8')">8</button>
+        <button class="key-btn" onclick="pinKey('9')">9</button>
+        <button class="key-btn" style="opacity:0;cursor:default"></button>
+        <button class="key-btn" onclick="pinKey('0')">0</button>
+        <button class="key-btn del" onclick="pinDel()">⌫</button>
+      </div>
+      <button class="key-btn enter" style="width:100%;margin-top:8px" onclick="pinSubmit()">Entrer</button>
+      <div class="pin-error" id="pin-error"></div>
+      <button class="back-link" onclick="backToUserSelect()">← Changer d'utilisateur</button>
+    </div>
+  </div>
+  <div class="login-footer">Un outil par <strong>Barman Agence Créative SNC</strong></div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+
+  <aside id="sidebar">
+    <div class="sb-brand">
+      <img src="assets/logo.png" alt="RB4U">
+      <div class="sb-brand-text">
+        <div class="sb-brand-name">So<span>Desk</span></div>
+        <div class="sb-brand-school" id="sb-school">HESTS</div>
+      </div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="sb-section">Principal</div>
+      <div class="nav-item active" onclick="goTo('dashboard',this)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Tableau de bord
+      </div>
+      <div class="nav-item" onclick="goTo('mailbox',this)">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Boîte partagée
+        <span class="nav-badge" id="mail-badge">3</span>
+      </div>
+
+      <div class="sb-section">Suivi</div>
+      <div class="nav-item" onclick="goTo('todo',this)">
+        <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Tâches
+      </div>
+      <div class="nav-item" onclick="goTo('gantt',this)">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
+        Planning Gantt
+      </div>
+      <div class="nav-item" onclick="goTo('agenda',this)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Agenda événements
+      </div>
+
+      <div class="sb-section" id="admin-section" style="display:none">Administration</div>
+      <div class="nav-item" id="admin-nav" onclick="goTo('admin',this)" style="display:none">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Utilisateurs
+      </div>
+    </nav>
+
+    <div class="sb-user">
+      <button class="sb-profile-btn" onclick="openProfile()" title="Mon profil">
+        <div class="sb-avatar" id="sb-av">LB</div>
+        <div>
+          <div class="sb-user-name" id="sb-name">Lohan</div>
+          <div class="sb-user-role" id="sb-role">Admin</div>
+        </div>
+      </button>
+      <button class="sb-logout" onclick="logout()" title="Déconnexion">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <main id="content">
+
+    <!-- DASHBOARD -->
+    <section class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div class="page-title" id="dash-greeting">Bonjour 👋</div>
+        <div class="page-sub" id="dash-date"></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card green">
+          <div class="stat-label">Emails non traités</div>
+          <div class="stat-val" id="stat-mails">3</div>
+          <div class="stat-hint">Dans la boîte partagée</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Tâches en cours</div>
+          <div class="stat-val" id="stat-tasks">7</div>
+          <div class="stat-hint">Sur 12 tâches totales</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Événements ce mois</div>
+          <div class="stat-val">4</div>
+          <div class="stat-hint">Dont 1 aujourd'hui</div>
+        </div>
+      </div>
+      <div class="dash-grid">
+        <div class="card">
+          <div class="section-hd"><div class="section-title">Activité récente</div></div>
+          <ul class="activity-list">
+            <li class="act-item">
+              <div class="act-av" style="background:#E8F4EE;color:#3C8A5E">JB</div>
+              <div class="act-text"><strong>Julia</strong> a traité : "Demande interview RTS"</div>
+              <div class="act-time">il y a 12 min</div>
+            </li>
+            <li class="act-item">
+              <div class="act-av" style="background:#3C8A5E;overflow:hidden"><img src="assets/lohanpp.png" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.textContent='LB'"></div>
+              <div class="act-text"><strong>Lohan</strong> a créé : "Relire communiqué"</div>
+              <div class="act-time">il y a 1h</div>
+            </li>
+            <li class="act-item">
+              <div class="act-av" style="background:#7C3AED;color:#fff">JB</div>
+              <div class="act-text"><strong>Julia</strong> a assigné un mail à Lohan</div>
+              <div class="act-time">il y a 2h</div>
+            </li>
+            <li class="act-item">
+              <div class="act-av" style="background:#3C8A5E;overflow:hidden"><img src="assets/lohanpp.png" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.textContent='LB'"></div>
+              <div class="act-text"><strong>Lohan</strong> a clôturé : "Newsletter mai"</div>
+              <div class="act-time">hier</div>
+            </li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="section-hd"><div class="section-title">Mes tâches du jour</div></div>
+          <ul class="activity-list" id="dash-tasks"></ul>
+        </div>
+      </div>
+
+      <!-- CHARTS ROW -->
+      <div class="dash-grid" style="margin-top:16px">
+        <div class="card">
+          <div class="section-hd">
+            <div class="section-title">Emails reçus</div>
+            <div class="toggle-grp chart-toggle" style="scale:0.9;transform-origin:right">
+              <button class="tog-btn active" onclick="switchEmailChart(this,'week')">Semaine</button>
+              <button class="tog-btn" onclick="switchEmailChart(this,'month')">Mois</button>
+            </div>
+          </div>
+          <div id="email-chart" style="margin:8px 0 4px"></div>
+          <div id="email-chart-month" style="margin:8px 0 4px;display:none"></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px">
+            <span>47 emails ce mois</span>
+            <span style="color:var(--green);font-weight:600">↑ +12% vs avril</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-hd"><div class="section-title">Réseaux sociaux</div></div>
+          <div class="social-stats">
+            <div class="social-stat">
+              <div class="social-icon" style="background:#0A66C2">in</div>
+              <div style="flex:1">
+                <div class="social-val">1'284</div>
+                <div class="social-lbl">LinkedIn</div>
+                <div class="social-trend up">↑ +66 ce mois</div>
+              </div>
+              <div id="linkedin-sparkline"></div>
+            </div>
+            <div class="social-stat">
+              <div class="social-icon" style="background:#1877F2">f</div>
+              <div style="flex:1">
+                <div class="social-val">3'721</div>
+                <div class="social-lbl">Facebook</div>
+                <div class="social-trend up">↑ +15 ce mois</div>
+              </div>
+              <div id="facebook-sparkline"></div>
+            </div>
+            <div class="social-stat">
+              <div class="social-icon" style="background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)">ig</div>
+              <div style="flex:1">
+                <div class="social-val">892</div>
+                <div class="social-lbl">Instagram</div>
+                <div class="social-trend up">↑ +2 ce mois</div>
+              </div>
+              <div id="instagram-sparkline"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAILBOX -->
+    <section class="page" id="page-mailbox">
+      <div class="page-header">
+        <div class="page-title">Boîte partagée</div>
+        <div class="page-sub">communication@hests.ch — synchronisation Outlook</div>
+      </div>
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="filterMail(this,'all')">Tous</button>
+        <button class="filter-btn" onclick="filterMail(this,'new')">Non traités</button>
+        <button class="filter-btn" onclick="filterMail(this,'mine')">Assignés à moi</button>
+        <button class="filter-btn" onclick="filterMail(this,'done')">Traités</button>
+      </div>
+      <div class="mail-list" id="mail-list"></div>
+    </section>
+
+    <!-- TODO -->
+    <section class="page" id="page-todo">
+      <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between">
+        <div>
+          <div class="page-title">Tâches</div>
+          <div class="page-sub">Glisser-déposer entre colonnes</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:12px;color:var(--muted)">Trier par</span>
+          <select class="form-sel" onchange="setSortTask(this)" style="padding:6px 10px;font-size:12px">
+            <option value="priority">Priorité</option>
+            <option value="date">Date</option>
+            <option value="manual">Manuel</option>
+          </select>
+        </div>
+      </div>
+      <div class="kanban">
+        <div class="k-col" id="k-todo" ondragover="dragOver(event)" ondrop="dropTask(event,'todo')">
+          <div class="k-col-hd">
+            <div class="k-col-title"><div class="k-dot todo"></div> À faire</div>
+            <div class="k-count" id="cnt-todo">0</div>
+          </div>
+          <div id="col-todo"></div>
+          <button class="add-task" onclick="openAddTask('todo')">+ Ajouter une tâche</button>
+        </div>
+        <div class="k-col" id="k-progress" ondragover="dragOver(event)" ondrop="dropTask(event,'progress')">
+          <div class="k-col-hd">
+            <div class="k-col-title"><div class="k-dot progress"></div> En cours</div>
+            <div class="k-count" id="cnt-progress">0</div>
+          </div>
+          <div id="col-progress"></div>
+          <button class="add-task" onclick="openAddTask('progress')">+ Ajouter une tâche</button>
+        </div>
+        <div class="k-col" id="k-done" ondragover="dragOver(event)" ondrop="dropTask(event,'done')">
+          <div class="k-col-hd">
+            <div class="k-col-title"><div class="k-dot done"></div> Terminé</div>
+            <div class="k-count" id="cnt-done">0</div>
+          </div>
+          <div id="col-done"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GANTT -->
+    <section class="page" id="page-gantt">
+      <div class="page-header">
+        <div class="page-title">Planning Gantt</div>
+        <div class="page-sub">Vue annuelle 2026 par semaines</div>
+      </div>
+      <div class="gantt-toolbar">
+        <div class="gantt-left">
+          <div class="toggle-grp">
+            <button class="tog-btn active" id="tog-lohan" onclick="switchGantt('lohan')">Lohan</button>
+            <button class="tog-btn" id="tog-julia" onclick="switchGantt('julia')">Julia</button>
+          </div>
+          <button class="btn-primary" onclick="openAddProject()" style="padding:7px 16px;font-size:12px">+ Projet</button>
+        </div>
+      </div>
+      <div class="legend-bar" id="legend-bar"></div>
+      <div class="gantt-wrap">
+        <table class="gantt-table" id="gantt-table"></table>
+      </div>
+    </section>
+
+    <!-- AGENDA -->
+    <section class="page" id="page-agenda">
+      <div class="page-header">
+        <div class="page-title">Agenda événements</div>
+        <div class="page-sub">Calendrier de l'équipe — lié à HESTS-VS-Agenda Outlook</div>
+      </div>
+      <div class="cal-nav">
+        <div class="cal-month-title" id="cal-title">Mai 2026</div>
+        <div style="display:flex;gap:8px">
+          <button class="cal-arrow" onclick="calNav(-1)">‹</button>
+          <button class="cal-arrow" onclick="calNav(1)">›</button>
+        </div>
+      </div>
+      <div class="cal-grid">
+        <div class="cal-wdays">
+          <div class="cal-wday">Lun</div><div class="cal-wday">Mar</div>
+          <div class="cal-wday">Mer</div><div class="cal-wday">Jeu</div>
+          <div class="cal-wday">Ven</div><div class="cal-wday">Sam</div>
+          <div class="cal-wday">Dim</div>
+        </div>
+        <div class="cal-days" id="cal-days"></div>
+      </div>
+    </section>
+
+    <!-- ADMIN -->
+    <section class="page" id="page-admin">
+      <div class="page-header">
+        <div class="page-title">Gestion des utilisateurs</div>
+        <div class="page-sub">Membres, couleurs, statuts personnalisés</div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px">
+        <div class="section-title" style="margin-bottom:16px">Inviter un membre</div>
+        <div class="add-user-bar">
+          <div class="form-grp">
+            <label class="form-lbl">Prénom & Nom</label>
+            <input class="form-inp" id="new-name" placeholder="Ex : Marc Dubois">
+          </div>
+          <div class="form-grp">
+            <label class="form-lbl">Email</label>
+            <input class="form-inp" id="new-email" placeholder="marc@hests.ch">
+          </div>
+          <div class="form-grp">
+            <label class="form-lbl">Rôle</label>
+            <select class="form-sel" id="new-role"><option>Membre</option><option>Admin</option></select>
+          </div>
+          <div class="form-grp">
+            <label class="form-lbl">Couleur</label>
+            <input type="color" class="form-inp" id="new-color" value="#3C8A5E" style="min-width:60px;padding:4px;height:40px;cursor:pointer">
+          </div>
+          <button class="btn-primary" onclick="addUser()">Inviter</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px">
+        <div class="section-title" style="margin-bottom:16px">Membres actifs</div>
+        <table class="u-table" id="u-table"></table>
+      </div>
+
+      <div class="card">
+        <div class="section-hd" style="margin-bottom:16px">
+          <div class="section-title">Statuts personnalisés — Boîte partagée</div>
+          <button class="btn-primary" onclick="addCustomStatus()" style="padding:7px 14px;font-size:12px">+ Statut</button>
+        </div>
+        <div class="custom-status-list" id="status-list"></div>
+      </div>
+
+      <div class="card" style="margin-top:20px;border-color:#FEE2E2">
+        <div class="section-title" style="color:#EF4444;margin-bottom:8px">Zone de danger</div>
+        <p style="font-size:13px;color:var(--muted);margin:0 0 14px">Efface toutes les données locales et recharge les données par défaut.</p>
+        <button onclick="resetToDefaults()" style="background:#EF4444;color:#fff;border:none;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Réinitialiser les données</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- MODAL ADD PROJET GANTT -->
+<div class="modal-overlay" id="modal-project" style="display:none" onclick="closeModal('modal-project')">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-hd">
+      <div class="modal-title" id="modal-project-title">Ajouter un projet</div>
+      <button class="modal-close" onclick="closeModal('modal-project')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grp">
+        <label class="form-lbl">Nom du projet</label>
+        <input class="form-inp" id="p-name" placeholder="Ex : Campagne réseaux sociaux">
+      </div>
+      <div class="modal-row">
+        <div class="form-grp">
+          <label class="form-lbl">Début (mois / semaine)</label>
+          <select class="form-sel" id="p-start" style="width:100%"></select>
+        </div>
+        <div class="form-grp">
+          <label class="form-lbl">Fin (mois / semaine)</label>
+          <select class="form-sel" id="p-end" style="width:100%"></select>
+        </div>
+      </div>
+      <div class="form-grp">
+        <label class="form-lbl">Statut / couleur</label>
+        <select class="form-sel" id="p-status" style="width:100%"></select>
+      </div>
+      <div class="form-grp">
+        <label class="form-lbl">Ajouter pour</label>
+        <div id="p-persons" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-project')">Annuler</button>
+      <button class="btn-primary" onclick="confirmAddProject()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADD TÂCHE -->
+<div class="modal-overlay" id="modal-task" style="display:none" onclick="closeModal('modal-task')">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-hd">
+      <div class="modal-title" id="modal-task-title">Nouvelle tâche</div>
+      <button class="modal-close" onclick="closeModal('modal-task')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grp">
+        <label class="form-lbl">Titre</label>
+        <input class="form-inp" id="t-title" placeholder="Ex : Relire communiqué de presse">
+      </div>
+      <div class="modal-row">
+        <div class="form-grp">
+          <label class="form-lbl">Assigné à</label>
+          <select class="form-sel" id="t-assignee" style="width:100%"></select>
+        </div>
+        <div class="form-grp">
+          <label class="form-lbl">Priorité</label>
+          <select class="form-sel" id="t-priority" style="width:100%">
+            <option value="high">🔴 Haute</option>
+            <option value="medium" selected>🟡 Moyenne</option>
+            <option value="low">⚪ Basse</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-row">
+        <div class="form-grp">
+          <label class="form-lbl">Date d'échéance</label>
+          <input type="date" class="form-inp" id="t-due">
+        </div>
+        <div class="form-grp">
+          <label class="form-lbl">Heure (optionnel)</label>
+          <input type="time" class="form-inp" id="t-time">
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="t-both"> Assigner aux deux personnes
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-task')">Annuler</button>
+      <button class="btn-primary" onclick="confirmAddTask()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PROFIL -->
+<div class="modal-overlay" id="modal-profile" style="display:none" onclick="closeModal('modal-profile')">
+  <div class="modal-card" onclick="event.stopPropagation()" style="max-width:380px">
+    <div class="modal-hd">
+      <div class="modal-title">Mon profil</div>
+      <button class="modal-close" onclick="closeModal('modal-profile')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="profile-user-info" style="display:flex;align-items:center;gap:14px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)"></div>
+      <div class="section-title" style="margin-bottom:14px">Changer mon code PIN</div>
+      <div class="form-grp">
+        <label class="form-lbl">Code actuel</label>
+        <input type="password" class="form-inp" id="prof-pin-current" maxlength="4" inputmode="numeric" placeholder="••••">
+      </div>
+      <div class="form-grp">
+        <label class="form-lbl">Nouveau code</label>
+        <input type="password" class="form-inp" id="prof-pin-new" maxlength="4" inputmode="numeric" placeholder="••••">
+      </div>
+      <div class="form-grp">
+        <label class="form-lbl">Confirmer le nouveau code</label>
+        <input type="password" class="form-inp" id="prof-pin-confirm" maxlength="4" inputmode="numeric" placeholder="••••">
+      </div>
+      <div id="prof-pin-error" style="font-size:12px;color:#EF4444;min-height:16px;margin-top:4px"></div>
+      <div id="prof-pin-success" style="font-size:12px;color:#059669;min-height:16px"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-profile')">Fermer</button>
+      <button class="btn-primary" onclick="saveNewPin()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
